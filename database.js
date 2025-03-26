@@ -66,18 +66,28 @@ db.serialize(() => {
   `);
 
    // ตารางพนักงาน
-  db.run(`
-    CREATE TABLE IF NOT EXISTS "employees" (
-      employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      role TEXT NOT NULL,
-      salary DECIMAL(10,2),
-      work_schedule TEXT,
-      username TEXT UNIQUE,
-      password_hash TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+ // ตารางพนักงาน
+db.run(`
+  CREATE TABLE IF NOT EXISTS "employees" (
+    employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    salary DECIMAL(10,2),
+    work_schedule TEXT,
+    role TEXT NOT NULL,  -- เพิ่ม role เพื่อป้องกันข้อผิดพลาด
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// ตาราง User
+db.run(`
+  CREATE TABLE IF NOT EXISTS "users" (  -- เปลี่ยนชื่อจาก "User" เป็น "users"
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL COLLATE NOCASE,  -- เพิ่ม UNIQUE ป้องกันซ้ำ
+    password TEXT NOT NULL,
+    role TEXT NOT NULL  -- ตรวจสอบค่า role
+  )
+`);
+
 
   // ตารางการชำระเงิน
   db.run(`
@@ -727,12 +737,12 @@ db.serialize(() => {
 
  // เตรียมคำสั่ง INSERT ให้ตรงกับโครงสร้างของตาราง7
  let stmt7 = db.prepare(`
-  INSERT INTO "employees" (employee_id, name, role, salary, username,password_hash,created_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO "employees" (employee_id, name, salary,work_schedule,role,created_at)
+  VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   //เพิ่มองค์ประกอบในตาราง
-  stmt7.run(null,"น้องแป้งคนสวย","พนักงานเสิร์ฟ",null,"บัญชีร้าน","1234",null)
+  stmt7.run(null,"น้องแป้งคนสวย",2000,null,"ชีเสิร์ฟ",null)
   //ปิดคำสั่ง
   stmt7.finalize();
 
@@ -747,11 +757,22 @@ db.serialize(() => {
   //ปิดคำสั่ง
   stmt8.finalize();
 
+// เตรียมคำสั่ง INSERT ให้ตรงกับโครงสร้างของตาราง9
+ let stmt9 = db.prepare(`
+  INSERT INTO "users" (user_id, username, password,role)
+  VALUES (?, ?, ?,?)
+  `);
+
+  //เพิ่มองค์ประกอบในตาราง
+  stmt9.run(null,"แป้ง","1234","admin")
+  //ปิดคำสั่ง
+  stmt9.finalize();
+
 
 
   
   // ดึงข้อมูลจากตารางและแสดงผล
-  db.all('SELECT menu.*, category.name_th AS category_name FROM menu INNER JOIN category ON menu.category_id = category.category_id;' , [], (err, rows) => {
+  db.all('SELECT * FROM "menu" "category"; "orders";"order_details";"inventory";"employees";"payments" "users" ' , [], (err, rows) => {
     if (err) {
       console.error('Error fetching data:', err.message);
     } else {
