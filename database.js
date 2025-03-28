@@ -83,11 +83,11 @@ db.run(`
 
 // ตาราง User
 db.run(`
-  CREATE TABLE IF NOT EXISTS "users" 
+  CREATE TABLE IF NOT EXISTS "users" (  
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL COLLATE NOCASE,  
     password TEXT NOT NULL,
-    role TEXT NOT NULL  
+    role TEXT NOT NULL  -- ตรวจสอบค่า role
   )
 `);
 
