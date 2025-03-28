@@ -50,9 +50,12 @@ db.serialize(() => {
       menu_id INTEGER,
       quantity INTEGER NOT NULL,
       price DECIMAL(10,2) NOT NULL,
-      note TEXT
+      note TEXT,
+      FOREIGN KEY (order_id) REFERENCES orders(order_id),
+      FOREIGN KEY (menu_id) REFERENCES menu(menu_id)
     )
   `);
+  
 
    // ตารางสต็อกวัตถุดิบ
   db.run(`
@@ -80,11 +83,11 @@ db.run(`
 
 // ตาราง User
 db.run(`
-  CREATE TABLE IF NOT EXISTS "users" (  -- เปลี่ยนชื่อจาก "User" เป็น "users"
+  CREATE TABLE IF NOT EXISTS "users" 
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL COLLATE NOCASE,  -- เพิ่ม UNIQUE ป้องกันซ้ำ
+    username TEXT NOT NULL COLLATE NOCASE,  
     password TEXT NOT NULL,
-    role TEXT NOT NULL  -- ตรวจสอบค่า role
+    role TEXT NOT NULL  
   )
 `);
 
@@ -702,12 +705,14 @@ db.run(`
   stmt3.finalize();
 
 // เตรียมคำสั่ง INSERT ให้ตรงกับโครงสร้างของตาราง4
- let stmt4 = db.prepare(`
+let stmt4 = db.prepare(`
   INSERT INTO "order_details" (order_detail_id, order_id, menu_id, quantity, price, note)
   VALUES (?, ?, ?, ?, ?, ?)
-  `);
-  //เพิ่มองค์ประกอบในตาราง
-  stmt4.run(null,null,null,3,30,"เผ็ด")
+`);
+
+// เพิ่มข้อมูลในตาราง "order_details" โดยกำหนด order_id และ menu_id ให้ถูกต้อง
+stmt4.run(null, 1, 5, 3, 30, "เผ็ด");
+
 
   //ปิดคำสั่ง
   stmt4.finalize();
